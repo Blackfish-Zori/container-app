@@ -1,6 +1,6 @@
 import { dummyTaskData, routes } from "./constants.js";
 
-import { getTasks } from "./functions.js";
+import { getTasks, addTask, checkTask, deleteTask } from "./functions.js";
 
 let visibleTasks = [];
 let taskData = [];
@@ -16,7 +16,6 @@ document.getElementById("nav").addEventListener("click", (e) => {
 init();
 
 function init() {
-  taskData = getTasks();
   navigate();
 }
 
@@ -38,6 +37,7 @@ function getRoute() {
 }
 
 function render() {
+  taskData = getTasks();
   const route = getRoute();
   if (route === "tasks") renderTasks();
   if (route === "stats") renderStats();
@@ -109,12 +109,13 @@ document.getElementById("add-form").addEventListener("submit", (e) => {
   const text = input.value.trim();
   if (!text) return;
 
-  taskData.push({
+  addTask({
     id: Math.random().toString(36).slice(2, 6),
     label: text,
     tag: tagSelect.value,
     done: false,
   });
+
   input.value = "";
   render();
 });
@@ -123,12 +124,11 @@ document.getElementById("task-list").addEventListener("click", (e) => {
   const checkId = e.target.dataset.id;
   const removeId = e.target.dataset.remove;
   if (checkId) {
-    const t = visibleTasks.find((t) => t.id == checkId);
-    if (t) t.done = !t.done;
+    checkTask(checkId);
     render();
   }
   if (removeId) {
-    taskData = taskData.filter((t) => t.id != removeId);
+    deleteTask(removeId);
     render();
   }
 });
