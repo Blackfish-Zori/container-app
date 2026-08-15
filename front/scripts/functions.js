@@ -1,22 +1,56 @@
 import { dummyTaskData } from "./constants.js";
 
-export function getTasks() {
-  return dummyTaskData;
+export async function getTasks() {
+  try {
+    const response = await fetch("http://localhost:3000/getalltasks");
+    const responseData = await response.json();
+    return responseData;
+  } catch (error) {
+    alert(error);
+  }
 }
 
 export function addTask(newTask) {
-  dummyTaskData.push(newTask);
+  try {
+    fetch("http://localhost:3000/addtask", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newTask),
+    });
+  } catch (error) {
+    alert(error);
+  }
 }
 
-export function checkTask(taskId) {
-  const targetTask = dummyTaskData.find((task) => task.id == taskId);
-  if (targetTask) targetTask.done = !targetTask.done;
+export async function checkTask(taskId) {
+  try {
+    fetch("http://localhost:3000/checktask", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ taskId }),
+    });
+  } catch (error) {
+    alert(error);
+  }
 }
 
-export function deleteTask(taskId) {
-  const targetTask = dummyTaskData.find((task) => task.id == taskId);
-  if (targetTask) {
-    const taskIndex = dummyTaskData.indexOf(targetTask);
-    if (taskIndex !== -1) dummyTaskData.splice(taskIndex, 1);
+export async function deleteTask(taskId) {
+  try {
+    fetch("http://localhost:3000/deletetask", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ taskId }),
+    });
+  } catch (error) {
+    alert(error);
   }
 }

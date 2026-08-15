@@ -1,0 +1,8 @@
+const dummyTaskData = [
+  { id: 1, label: "Sketch the wireframe", tag: "work", done: true },
+  { id: 2, label: "Water the plants", tag: "home", done: false },
+  { id: 3, label: "Reply to client email", tag: "work", done: false },
+  { id: 4, label: "Read for 20 minutes", tag: "general", done: false },
+];
+
+module.exports = dummyTaskData;

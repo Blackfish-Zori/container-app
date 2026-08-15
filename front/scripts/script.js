@@ -36,16 +36,23 @@ function getRoute() {
   return routes.includes(hash) ? hash : "tasks";
 }
 
-function render() {
-  taskData = getTasks();
+async function render() {
+  taskData = await getTasks();
   const route = getRoute();
   if (route === "tasks") renderTasks();
   if (route === "stats") renderStats();
+  getTasks().then((data) => {
+    taskData = data;
+    const route = getRoute();
+    if (route === "tasks") renderTasks();
+    if (route === "stats") renderStats();
+  });
 }
 
 function renderTasks() {
   const list = document.getElementById("task-list");
   const empty = document.getElementById("empty-state");
+  list.replaceChildren();
   visibleTasks = taskData.filter((t) => {
     if (currentFilter === "active") return !t.done;
     if (currentFilter === "done") return t.done;
@@ -124,12 +131,14 @@ document.getElementById("task-list").addEventListener("click", (e) => {
   const checkId = e.target.dataset.id;
   const removeId = e.target.dataset.remove;
   if (checkId) {
-    checkTask(checkId);
-    render();
+    checkTask(checkId).then(() => {
+      render();
+    });
   }
   if (removeId) {
-    deleteTask(removeId);
-    render();
+    deleteTask(removeId).then(() => {
+      render();
+    });
   }
 });
 
