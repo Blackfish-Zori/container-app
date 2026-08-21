@@ -1,30 +1,47 @@
-import { dummyTaskData, routes } from "./constants.js";
+/**
+ * Imports
+ */
+import { checkDbConnection, getTasks } from "./functions.js";
+import { routes } from "./constants.js";
 
-import { getTasks, addTask, checkTask, deleteTask } from "./functions.js";
-
-let visibleTasks = [];
-let taskData = [];
+/**
+ * Global vars
+ */
+const appTasks = [];
+//const visibleApptasks = [];
 let currentFilter = "all";
+const tags = ["work", "home", "general"];
 
-window.addEventListener("hashchange", navigate);
-document.getElementById("nav").addEventListener("click", (e) => {
-  if (e.target.tagName === "A") {
-    location.hash = e.target.dataset.route;
-  }
-});
+/**
+ * Element selectors
+ */
+const list = document.getElementById("task-list");
+const empty = document.getElementById("empty-state");
+const statTotal = document.getElementById("stat-total");
+const statDone = document.getElementById("stat-done");
+const statPct = document.getElementById("stat-pct");
+const breakdown = document.getElementById("tag-breakdown");
 
-init();
+/**
+ * Functions
+ */
 
-function init() {
-  navigate();
-}
-
+// Navigate to selected page
 function navigate() {
+  console.log("Init");
+
+  // get url fragment
   const route = getRoute();
+
+  // Hide all sections
   document
     .querySelectorAll(".view")
-    .forEach((v) => v.classList.remove("active"));
+    .forEach((section) => section.classList.remove("active"));
+
+  // Show section with selected fragment
   document.getElementById("view-" + route).classList.add("active");
+
+  // Indicate active a element
   document.querySelectorAll("#nav a").forEach((a) => {
     a.classList.toggle("active", a.dataset.route === route);
   });
@@ -36,60 +53,59 @@ function getRoute() {
   return routes.includes(hash) ? hash : "tasks";
 }
 
+// Display selected page data
 async function render() {
-  taskData = await getTasks();
+  const dbTasks = await getTasks();
+  appTasks.length = 0;
+  appTasks.push(...dbTasks);
+  console.log(appTasks);
   const route = getRoute();
   if (route === "tasks") renderTasks();
   if (route === "stats") renderStats();
-  getTasks().then((data) => {
-    taskData = data;
-    const route = getRoute();
-    if (route === "tasks") renderTasks();
-    if (route === "stats") renderStats();
-  });
 }
 
+// Display tasks page data
 function renderTasks() {
-  const list = document.getElementById("task-list");
-  const empty = document.getElementById("empty-state");
+  console.log("render tasks");
+
   list.replaceChildren();
-  visibleTasks = taskData.filter((t) => {
-    if (currentFilter === "active") return !t.done;
-    if (currentFilter === "done") return t.done;
+  const visibleTasks = appTasks.filter((task) => {
+    if (currentFilter === "active") return !task.done;
+    if (currentFilter === "done") return task.done;
     return true;
   });
 
   list.innerHTML = "";
   empty.style.display = visibleTasks.length ? "none" : "block";
 
-  visibleTasks.forEach((t) => {
+  visibleTasks.forEach((task) => {
     const li = document.createElement("li");
-    li.className = t.done ? "done" : "";
+    li.className = task.done ? "done" : "";
     li.innerHTML = `
-        <span class="check" data-id="${t.id}"></span>
-        <span class="label">${escapeHtml(t.label)}</span>
-        <span class="tag">${t.tag}</span>
-        <button class="ghost" data-remove="${t.id}">✕</button>
+        <span class="check" data-id="${task.id}"></span>
+        <span class="label">${escapeHtml(task.label)}</span>
+        <span class="tag">${task.tag}</span>
+        <button class="ghost" data-remove="${task.id}">✕</button>
       `;
     list.appendChild(li);
   });
 }
 
+// Display stats page data
 function renderStats() {
-  const total = taskData.length;
-  const done = taskData.filter((t) => t.done).length;
+  console.log("render stats");
+
+  const total = appTasks.length;
+  const done = appTasks.filter((t) => t.done).length;
   const pct = total ? Math.round((done / total) * 100) : 0;
 
-  document.getElementById("stat-total").textContent = total;
-  document.getElementById("stat-done").textContent = done;
-  document.getElementById("stat-pct").textContent = pct + "%";
-
-  const tags = ["work", "home", "general"];
-  const breakdown = document.getElementById("tag-breakdown");
+  statTotal.textContent = total;
+  statDone.textContent = done;
+  statPct.textContent = pct + "%";
   breakdown.innerHTML =
     '<div class="stat-label" style="margin-bottom:.75rem;">By category</div>';
   tags.forEach((tag) => {
-    const count = taskData.filter((t) => t.tag === tag).length;
+    const count = appTasks.filter((task) => task.tag === tag).length;
     const width = total ? Math.round((count / total) * 100) : 0;
     const row = document.createElement("div");
     row.className = "bar-row";
@@ -108,46 +124,28 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ---------- Events ----------
-document.getElementById("add-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const input = document.getElementById("task-input");
-  const tagSelect = document.getElementById("task-tag");
-  const text = input.value.trim();
-  if (!text) return;
+/**
+ * Script starting point
+ */
+main();
 
-  addTask({
-    id: Math.random().toString(36).slice(2, 6),
-    label: text,
-    tag: tagSelect.value,
-    done: false,
-  });
-
-  input.value = "";
-  render();
-});
-
-document.getElementById("task-list").addEventListener("click", (e) => {
-  const checkId = e.target.dataset.id;
-  const removeId = e.target.dataset.remove;
-  if (checkId) {
-    checkTask(checkId).then(() => {
-      render();
+async function main() {
+  console.log("Starting app...");
+  // Check DB connection
+  const dbconnection = await checkDbConnection();
+  // If connected to DB
+  if (dbconnection) {
+    // If url fragment changed call navigate
+    window.addEventListener("hashchange", navigate);
+    document.getElementById("nav").addEventListener("click", (event) => {
+      if (event.target.tagName === "A") {
+        // Change url fragment
+        location.hash = event.target.dataset.route;
+      }
     });
+    navigate();
+  } else {
+    document.getElementById("view-no-conn").classList.add("active");
+    console.log("Cannot connect to database");
   }
-  if (removeId) {
-    deleteTask(removeId).then(() => {
-      render();
-    });
-  }
-});
-
-document.getElementById("filters").addEventListener("click", (e) => {
-  if (e.target.tagName !== "BUTTON") return;
-  currentFilter = e.target.dataset.filter;
-  document
-    .querySelectorAll("#filters button")
-    .forEach((b) => b.classList.remove("active"));
-  e.target.classList.add("active");
-  renderTasks();
-});
+}

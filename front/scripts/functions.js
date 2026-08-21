@@ -1,16 +1,29 @@
 import { dummyTaskData } from "./constants.js";
 
+export async function checkDbConnection() {
+  try {
+    const response = await fetch("http://localhost:3000/checkdbconnection");
+    const data = await response.json();
+    if (data.status !== "ok") {
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("DB connection check failed", err);
+  }
+}
+
 export async function getTasks() {
   try {
     const response = await fetch("http://localhost:3000/getalltasks");
     const responseData = await response.json();
     return responseData;
   } catch (error) {
-    alert(error);
+    console.log(error);
   }
 }
 
-export function addTask(newTask) {
+export async function addTask(newTask) {
   try {
     fetch("http://localhost:3000/addtask", {
       method: "POST",
@@ -21,7 +34,7 @@ export function addTask(newTask) {
       body: JSON.stringify(newTask),
     });
   } catch (error) {
-    alert(error);
+    console.log(error);
   }
 }
 
@@ -36,7 +49,7 @@ export async function checkTask(taskId) {
       body: JSON.stringify({ taskId }),
     });
   } catch (error) {
-    alert(error);
+    console.log(error);
   }
 }
 
@@ -51,6 +64,6 @@ export async function deleteTask(taskId) {
       body: JSON.stringify({ taskId }),
     });
   } catch (error) {
-    alert(error);
+    console.log(error);
   }
 }
