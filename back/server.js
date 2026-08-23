@@ -1,13 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const dummyTaskData = require("./data/data.js");
 
-const PORT = 3000;
-const MONGODB_URI =
-  "mongodb+srv://zorislavsic_db_user:Alfaromeo147ts@container-app.b6xxc7r.mongodb.net/?appName=container-app&authSource=admin";
-const DB_NAME = "container-app-db";
-const COLLECTION_NAME = "tasks";
+const PORT = process.env.PORT;
+const MONGODB_URI = process.env.MONGODB_URI;
+const DB_NAME = process.env.DB_NAME;
+const COLLECTION_NAME = process.env.COLLECTION_NAME;
 
 let db;
 let collection;
@@ -23,16 +23,16 @@ app.get("/", function (req, res) {
 
 app.get("/checkdbconnection", async function (req, res) {
   if (!db) {
-    return res.status(503).json({ status: "error", db: "not_connected" });
+    return res.status(503).json({ success: false, db: "not_connected" });
   }
 
   try {
     await db.command({ ping: 1 });
-    res.status(200).json({ status: "ok", db: "connected" });
-  } catch (err) {
+    res.status(200).json({ success: true, db: "connected" });
+  } catch (error) {
     res
       .status(503)
-      .json({ status: "error", db: "unreachable", message: err.message });
+      .json({ success: false, db: "unreachable", message: error.message });
   }
 });
 
@@ -41,7 +41,7 @@ app.get("/getalltasks", async function (req, res) {
     const readTasks = await collection.find({}).toArray();
     res.status(200).send(readTasks);
   } catch (error) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: error.message });
     console.log(error);
   }
 });
@@ -58,9 +58,9 @@ app.post("/addtask", async function (req, res) {
     };
 
     await collection.insertOne(newTask);
-    res.status(201);
+    res.status(201).json({ success: true });
   } catch (error) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: error.message });
     console.log(error);
   }
 });
@@ -68,12 +68,17 @@ app.post("/addtask", async function (req, res) {
 app.post("/checktask", async function (req, res) {
   try {
     const { taskId } = req.body;
-    await collection.findOneAndUpdate({ id: Number(taskId) }, [
+    await collection.findOneAndUpdate({ id: taskId }, [
       { $set: { done: { $not: "$done" } } },
     ]);
-    res.status(201);
+    if (!result) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+    }
+    res.status(200).json({ success: true });
   } catch (error) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: error.message });
     console.log(error);
   }
 });
@@ -81,11 +86,15 @@ app.post("/checktask", async function (req, res) {
 app.post("/deletetask", async function (req, res) {
   try {
     const { taskId } = req.body;
-
     await collection.deleteOne({ id: taskId });
-    res.status(201);
+    if (result.deletedCount === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+    }
+    res.status(204).json({ success: true });
   } catch (error) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: error.message });
     console.log(error);
   }
 });

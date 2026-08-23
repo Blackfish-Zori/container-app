@@ -3,8 +3,8 @@ import { dummyTaskData } from "./constants.js";
 export async function checkDbConnection() {
   try {
     const response = await fetch("http://localhost:3000/checkdbconnection");
-    const data = await response.json();
-    if (data.status !== "ok") {
+    const responseData = await response.json();
+    if (!responseData.success) {
       return false;
     }
     return true;
@@ -16,8 +16,8 @@ export async function checkDbConnection() {
 export async function getTasks() {
   try {
     const response = await fetch("http://localhost:3000/getalltasks");
-    const responseData = await response.json();
-    return responseData;
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    return await response.json();
   } catch (error) {
     console.log(error);
   }
@@ -25,7 +25,7 @@ export async function getTasks() {
 
 export async function addTask(newTask) {
   try {
-    fetch("http://localhost:3000/addtask", {
+    const response = await fetch("http://localhost:3000/addtask", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -33,6 +33,8 @@ export async function addTask(newTask) {
       },
       body: JSON.stringify(newTask),
     });
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    return await response.json();
   } catch (error) {
     console.log(error);
   }
@@ -40,7 +42,7 @@ export async function addTask(newTask) {
 
 export async function checkTask(taskId) {
   try {
-    fetch("http://localhost:3000/checktask", {
+    const response = await fetch("http://localhost:3000/checktask", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -48,6 +50,8 @@ export async function checkTask(taskId) {
       },
       body: JSON.stringify({ taskId }),
     });
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    return await response.json();
   } catch (error) {
     console.log(error);
   }
@@ -55,7 +59,7 @@ export async function checkTask(taskId) {
 
 export async function deleteTask(taskId) {
   try {
-    fetch("http://localhost:3000/deletetask", {
+    const response = await fetch("http://localhost:3000/deletetask", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -63,6 +67,8 @@ export async function deleteTask(taskId) {
       },
       body: JSON.stringify({ taskId }),
     });
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    return await response.json();
   } catch (error) {
     console.log(error);
   }

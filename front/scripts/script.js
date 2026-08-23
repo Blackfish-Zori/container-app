@@ -1,7 +1,13 @@
 /**
  * Imports
  */
-import { checkDbConnection, getTasks } from "./functions.js";
+import {
+  checkDbConnection,
+  getTasks,
+  addTask,
+  deleteTask,
+  checkTask,
+} from "./functions.js";
 import { routes } from "./constants.js";
 
 /**
@@ -21,6 +27,18 @@ const statTotal = document.getElementById("stat-total");
 const statDone = document.getElementById("stat-done");
 const statPct = document.getElementById("stat-pct");
 const breakdown = document.getElementById("tag-breakdown");
+const form = document.getElementById("add-form");
+const input = document.getElementById("task-input");
+const tagSelect = document.getElementById("task-tag");
+const taskList = document.getElementById("task-list");
+const filters = document.getElementById("filters");
+
+/**
+ * Event listeners
+ */
+form.addEventListener("submit", submitForm);
+taskList.addEventListener("click", checkDeleteTask);
+filters.addEventListener("click", filterTasks);
 
 /**
  * Functions
@@ -28,8 +46,6 @@ const breakdown = document.getElementById("tag-breakdown");
 
 // Navigate to selected page
 function navigate() {
-  console.log("Init");
-
   // get url fragment
   const route = getRoute();
 
@@ -58,7 +74,6 @@ async function render() {
   const dbTasks = await getTasks();
   appTasks.length = 0;
   appTasks.push(...dbTasks);
-  console.log(appTasks);
   const route = getRoute();
   if (route === "tasks") renderTasks();
   if (route === "stats") renderStats();
@@ -66,8 +81,6 @@ async function render() {
 
 // Display tasks page data
 function renderTasks() {
-  console.log("render tasks");
-
   list.replaceChildren();
   const visibleTasks = appTasks.filter((task) => {
     if (currentFilter === "active") return !task.done;
@@ -93,8 +106,6 @@ function renderTasks() {
 
 // Display stats page data
 function renderStats() {
-  console.log("render stats");
-
   const total = appTasks.length;
   const done = appTasks.filter((t) => t.done).length;
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -116,6 +127,49 @@ function renderStats() {
       `;
     breakdown.appendChild(row);
   });
+}
+
+// Submit form
+async function submitForm(event) {
+  event.preventDefault();
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  const newTask = {
+    id: Math.random().toString(36).slice(2, 6),
+    label: text,
+    tag: tagSelect.value,
+    done: false,
+  };
+  await addTask(newTask);
+  input.value = "";
+  navigate();
+}
+
+// Check or delete task
+async function checkDeleteTask(event) {
+  const checkId = event.target.dataset.id;
+  const removeId = event.target.dataset.remove;
+  if (checkId) {
+    await checkTask(checkId);
+    navigate();
+  }
+  if (removeId) {
+    await deleteTask(removeId);
+    navigate();
+  }
+}
+
+// Filter tasks view
+function filterTasks(event) {
+  if (event.target.tagName !== "BUTTON") return;
+  currentFilter = event.target.dataset.filter;
+  document
+    .querySelectorAll("#filters button")
+    .forEach((button) => button.classList.remove("active"));
+  event.target.classList.add("active");
+  navigate();
 }
 
 function escapeHtml(str) {
