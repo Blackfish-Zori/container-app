@@ -68,9 +68,28 @@ app.post("/addtask", async function (req, res) {
 app.post("/checktask", async function (req, res) {
   try {
     const { taskId } = req.body;
-    await collection.findOneAndUpdate({ id: taskId }, [
+    const result = await collection.findOneAndUpdate({ id: taskId }, [
       { $set: { done: { $not: "$done" } } },
     ]);
+    if (!result) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+    }
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+    console.log(error);
+  }
+});
+
+app.post("/edittask", async function (req, res) {
+  try {
+    const { id, label, tag, done = false } = req.body;
+    const result = await collection.findOneAndUpdate(
+      { id: id },
+      { $set: { label: label, tag: tag } },
+    );
     if (!result) {
       return res
         .status(404)
@@ -86,13 +105,13 @@ app.post("/checktask", async function (req, res) {
 app.post("/deletetask", async function (req, res) {
   try {
     const { taskId } = req.body;
-    await collection.deleteOne({ id: taskId });
+    const result = await collection.deleteOne({ id: taskId });
     if (result.deletedCount === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Task not found" });
     }
-    res.status(204).json({ success: true });
+    res.status(200).json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
     console.log(error);

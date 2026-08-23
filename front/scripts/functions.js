@@ -40,6 +40,23 @@ export async function addTask(newTask) {
   }
 }
 
+export async function editTask(updatedTask) {
+  try {
+    const response = await fetch("http://localhost:3000/edittask", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedTask),
+    });
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function checkTask(taskId) {
   try {
     const response = await fetch("http://localhost:3000/checktask", {

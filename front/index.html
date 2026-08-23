@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Personal — Task Board</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="./styles/style.css">
 </head>
 
@@ -34,13 +35,13 @@
       <p class="sub">Tasks are stored persistently in MongoDB.</p>
 
       <form class="add-row" id="add-form">
-        <input type="text" id="task-input" placeholder="Add a task…" autocomplete="off">
+        <input type="text" id="task-input" placeholder="Add a task…" autocomplete="off" data-id="" data-done="">
         <select id="task-tag">
           <option value="general">General</option>
           <option value="work">Work</option>
           <option value="home">Home</option>
         </select>
-        <button type="submit">Add</button>
+        <button id="form-button" type="submit">Add</button>
       </form>
 
       <div class="filters" id="filters">

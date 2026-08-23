@@ -5,6 +5,7 @@ import {
   checkDbConnection,
   getTasks,
   addTask,
+  editTask,
   deleteTask,
   checkTask,
 } from "./functions.js";
@@ -29,15 +30,15 @@ const statPct = document.getElementById("stat-pct");
 const breakdown = document.getElementById("tag-breakdown");
 const form = document.getElementById("add-form");
 const input = document.getElementById("task-input");
+const taskTag = document.getElementById("task-tag");
 const tagSelect = document.getElementById("task-tag");
-const taskList = document.getElementById("task-list");
 const filters = document.getElementById("filters");
+const formBtn = document.getElementById("form-button");
 
 /**
  * Event listeners
  */
 form.addEventListener("submit", submitForm);
-taskList.addEventListener("click", checkDeleteTask);
 filters.addEventListener("click", filterTasks);
 
 /**
@@ -94,12 +95,38 @@ function renderTasks() {
   visibleTasks.forEach((task) => {
     const li = document.createElement("li");
     li.className = task.done ? "done" : "";
-    li.innerHTML = `
-        <span class="check" data-id="${task.id}"></span>
-        <span class="label">${escapeHtml(task.label)}</span>
-        <span class="tag">${task.tag}</span>
-        <button class="ghost" data-remove="${task.id}">✕</button>
-      `;
+
+    const check = document.createElement("span");
+    check.classList = "check";
+    check.addEventListener("click", () => initToggleTaskCheck(task.id));
+    const label = document.createElement("span");
+    label.classList = "label";
+    const div = document.createElement("div");
+    div.textContent = task.label;
+    label.appendChild(div);
+    const tag = document.createElement("span");
+    tag.classList = "tag";
+    tag.textContent = task.tag;
+    const editBtn = document.createElement("button");
+    editBtn.classList = "ghost";
+    editBtn.addEventListener("click", () => initEditTask(task));
+    const editIcon = document.createElement("span");
+    editIcon.classList = "material-icons";
+    editIcon.textContent = "edit";
+    editBtn.appendChild(editIcon);
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList = "ghost";
+    deleteBtn.addEventListener("click", () => initDeleteTask(task.id));
+    const deleteIcon = document.createElement("span");
+    deleteIcon.classList = "material-icons";
+    deleteIcon.textContent = "delete";
+    deleteBtn.appendChild(deleteIcon);
+
+    li.appendChild(check);
+    li.appendChild(label);
+    li.appendChild(tag);
+    li.appendChild(editBtn);
+    li.appendChild(deleteBtn);
     list.appendChild(li);
   });
 }
@@ -134,31 +161,56 @@ async function submitForm(event) {
   event.preventDefault();
 
   const text = input.value.trim();
-  if (!text) return;
+  if (!text) {
+    formBtn.textContent = "Add";
+    return;
+  }
 
-  const newTask = {
-    id: Math.random().toString(36).slice(2, 6),
-    label: text,
-    tag: tagSelect.value,
-    done: false,
-  };
-  await addTask(newTask);
-  input.value = "";
+  if (formBtn.textContent === "Add") {
+    const newTask = {
+      id: Math.random().toString(36).slice(2, 6),
+      label: text,
+      tag: tagSelect.value,
+      done: false,
+    };
+    await addTask(newTask);
+    input.value = "";
+    navigate();
+  } else if (formBtn.textContent === "Ok") {
+    const updatedTask = {
+      id: input.dataset.id,
+      label: text,
+      tag: tagSelect.value,
+      done: !!input.dataset.done,
+    };
+    await editTask(updatedTask);
+    input.value = "";
+    formBtn.textContent = "Add";
+    taskTag.value = "general";
+    navigate();
+  }
+}
+
+// Initiate task check mark toggle
+async function initToggleTaskCheck(taskId) {
+  await checkTask(taskId);
   navigate();
 }
 
-// Check or delete task
-async function checkDeleteTask(event) {
-  const checkId = event.target.dataset.id;
-  const removeId = event.target.dataset.remove;
-  if (checkId) {
-    await checkTask(checkId);
-    navigate();
-  }
-  if (removeId) {
-    await deleteTask(removeId);
-    navigate();
-  }
+// Initiate task delete
+async function initDeleteTask(taskId) {
+  console.log(taskId);
+  await deleteTask(taskId);
+  navigate();
+}
+
+// Initiate task edit
+function initEditTask(task) {
+  input.dataset.id = task.id;
+  input.value = task.label;
+  taskTag.value = task.tag;
+  input.dataset.done = task.done;
+  formBtn.textContent = "Ok";
 }
 
 // Filter tasks view
@@ -170,12 +222,6 @@ function filterTasks(event) {
     .forEach((button) => button.classList.remove("active"));
   event.target.classList.add("active");
   navigate();
-}
-
-function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
 }
 
 /**
