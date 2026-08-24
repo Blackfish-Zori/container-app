@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
-const dummyTaskData = require("./data/data.js");
+//const dummyTaskData = require("./data/data.js");
 
 const PORT = process.env.PORT;
 const MONGODB_URI = process.env.MONGODB_URI;
