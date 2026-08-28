@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-back-dep
+  labels:
+    app: app-back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-back
+  template:
+    metadata:
+      labels:
+        app: app-back
+    spec:
+      containers:
+        - name: app-back-container
+          image: zorislavsic/blackfish:app-back
+          ports:
+            - containerPort: 3000
