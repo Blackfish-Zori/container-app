@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: app-back-srv
   labels:
-    app: backendapp-back
+    app: app-back
 spec:
   type: NodePort
   selector:

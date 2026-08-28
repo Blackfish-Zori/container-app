@@ -1,8 +1,10 @@
 import { dummyTaskData } from "./constants.js";
 
+const BACKEND_URL = "http://app-back-srv:3000";
+
 export async function checkDbConnection() {
   try {
-    const response = await fetch("http://localhost:3000/checkdbconnection");
+    const response = await fetch(`${BACKEND_URL}/checkdbconnection`);
     const responseData = await response.json();
     if (!responseData.success) {
       return false;
@@ -15,7 +17,7 @@ export async function checkDbConnection() {
 
 export async function getTasks() {
   try {
-    const response = await fetch("http://localhost:3000/getalltasks");
+    const response = await fetch(`${BACKEND_URL}/getalltasks`);
     if (!response.ok) throw new Error(`Server error: ${response.status}`);
     return await response.json();
   } catch (error) {
@@ -25,7 +27,7 @@ export async function getTasks() {
 
 export async function addTask(newTask) {
   try {
-    const response = await fetch("http://localhost:3000/addtask", {
+    const response = await fetch(`${BACKEND_URL}/addtask`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -42,7 +44,7 @@ export async function addTask(newTask) {
 
 export async function editTask(updatedTask) {
   try {
-    const response = await fetch("http://localhost:3000/edittask", {
+    const response = await fetch(`${BACKEND_URL}/edittask`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -59,7 +61,7 @@ export async function editTask(updatedTask) {
 
 export async function checkTask(taskId) {
   try {
-    const response = await fetch("http://localhost:3000/checktask", {
+    const response = await fetch(`${BACKEND_URL}/checktask`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -76,7 +78,7 @@ export async function checkTask(taskId) {
 
 export async function deleteTask(taskId) {
   try {
-    const response = await fetch("http://localhost:3000/deletetask", {
+    const response = await fetch(`${BACKEND_URL}/deletetask`, {
       method: "POST",
       headers: {
         Accept: "application/json",
