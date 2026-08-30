@@ -5,7 +5,7 @@ metadata:
   labels:
     app: mongodb
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: mongodb
   ports:
@@ -13,4 +13,3 @@ spec:
       protocol: TCP
       port: 27017
       targetPort: 27017
-      nodePort: 30003
