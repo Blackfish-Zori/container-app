@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: app-back-container
-          image: zorislavsic/blackfish:app-back
+          image: zorislavsic/blackfish:app-back-11
           ports:
             - containerPort: 3000

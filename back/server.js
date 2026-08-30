@@ -6,6 +6,7 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const PORT = process.env.PORT;
 const MONGODB_URI = process.env.MONGODB_URI;
+// const MONGODB_URI="mongodb+srv://zorislavsic_db_user:Alfaromeo147ts@container-app.b6xxc7r.mongodb.net/?appName=container-app&authSource=admin"
 const DB_NAME = process.env.DB_NAME;
 const COLLECTION_NAME = process.env.COLLECTION_NAME;
 

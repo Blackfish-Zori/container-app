@@ -5,7 +5,7 @@ metadata:
   labels:
     app: app-front
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: app-front
   ports:
@@ -13,4 +13,3 @@ spec:
       protocol: TCP
       port: 8888
       targetPort: 80
-      nodePort: 30001

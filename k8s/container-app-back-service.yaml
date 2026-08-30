@@ -5,11 +5,10 @@ metadata:
   labels:
     app: app-back
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: app-back
   ports:
     - protocol: TCP
       port: 3000
       targetPort: 3000
-      nodePort: 30002
