@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app-front-container
-          image: zorislavsic/blackfish:app-front-13
+          image: zorislavsic/blackfish:app-front-14
           ports:
             - containerPort: 80
               name: http
