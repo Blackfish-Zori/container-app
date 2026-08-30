@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mongodb-container
-          image: mongodb
+          image: mongo
           ports:
             - containerPort: 27017
               name: http
