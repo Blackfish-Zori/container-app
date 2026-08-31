@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
         - name: app-back-container
-          image: zorislavsic/blackfish:app-back-13
+          image: zorislavsic/blackfish:app-back-14
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
