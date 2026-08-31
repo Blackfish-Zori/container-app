@@ -28,6 +28,7 @@ spec:
               value: "Passw0rd123!"
           volumeMounts:
             - name: mongodb-storage
+              mountPath: /data/db
       volumes:
         - name: mongodb-storage
           persistentVolumeClaim:
