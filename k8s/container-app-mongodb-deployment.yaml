@@ -26,3 +26,9 @@ spec:
               value: "admin"
             - name: MONGO_INITDB_ROOT_PASSWORD
               value: "Passw0rd123!"
+          volumeMounts:
+            - name: mongodb-storage
+      volumes:
+        - name: mongodb-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
