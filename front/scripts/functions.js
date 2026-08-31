@@ -1,6 +1,6 @@
 import { dummyTaskData } from "./constants.js";
 
-const BACKEND_URL = "http://app-back-srv:3000";
+const BACKEND_URL = "http://minikube:3000";
 
 export async function checkDbConnection() {
   try {
